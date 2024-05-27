@@ -1,0 +1,7 @@
+*~
+build
+*.swp
+.idea/
+resources.txt
+*.pyc
+.DS_Store
