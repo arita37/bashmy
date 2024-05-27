@@ -1,6 +1,10 @@
 # Collection of bash scripts
 ```bash
 
+### Target
+
+   Bash scripts util for Macos (.zhrc) or linux bash (.bashrc)
+
 ### Usage
  1) Copy the folder mybash/ where you want
      git clone https://github.com/arita37/myutil.git
