@@ -7,26 +7,27 @@
 
 ### Usage
  1) Copy the folder mybash/ where you want
-     git clone https://github.com/arita37/myutil.git
+     git clone https://github.com/arita37/mybash.git
      cd myutil
      git checkout devtorch
-     echo $pwd  ### copy this below
+     echo $pwd  ### copy this below as REPOFOLDER
 
 
 
  2) in your bashrc or zshrc,  add those lines
 
-     export mybashdir=YOURFOLDER/myutil/utilmy/tools/mybash/mybash/
-     export PATH="$mybashdir:$PATH"
-     chmod -R 777 $mybashdir                    ### exec
-     source $mybashdir/__init/init_all.sh       ##### Init all the alias
+     ####### mybash library
+        export mybashdir=REPOFOLDER/mybash/
+        export PATH="$mybashdir:$PATH"
+        chmod -R 777 $mybashdir                    ### exec
+        source $mybashdir/__init/init_all.sh       ##### Init all the alias
 
 
  3) Initlize all alias,vars,...
      source $mybash/__init/init_all.sh
 
 
-#### Example
+#### Usage
      folder size        ./             #### Print folder size in Gb
      folder topfile     ./    20       #### Print 20 biggest size files
      folder recentifle  ./    10       #### Print recently modified files   
