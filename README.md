@@ -7,8 +7,8 @@
 
 ### Usage
  1) Copy the folder mybash/ where you want
-     git clone https://github.com/arita37/mybash.git
-     cd myutil
+     git clone https://github.com/arita37/bashmy.git
+     cd bashmy
      git checkout current
      echo $pwd  ### copy this below as REPOFOLDER
 
