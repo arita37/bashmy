@@ -8,20 +8,19 @@
 ### Install
  1) Copy the folder mybash/ where you want
      git clone https://github.com/arita37/bashmy.git
-     cd bashmy
-     git checkout current
+     cd bashmy && git checkout current
      echo $pwd  ### copy paste this below as THE_REPO_FOLDER
 
 
 
  2) in your bashrc or zshrc,  add those lines
-
-     ####### mybash library
+     ####### mybash library    ########################
         export mybashdir="THE_REPO_FOLDER/mybash/"
         export PATH="$mybashdir:$PATH"
         chmod -R 777 $mybashdir                    ### exec
+     ##################################################
 
-
+     ßsource ~/.zshrc
 
 #### Example Usage
      folder size        ./             #### Print folder size in Gb
