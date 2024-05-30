@@ -110,6 +110,8 @@ elif [[ "$task" = backup ]]; then
       pathbase="backup_$YMD"
       dir_to=$3 && [ -z $3 ] && dir_to="~/zbackup/$pathbase"
 
+      mkdir -p $dir_to
+
       rsync -ar $ppath $dir_to
 
 
