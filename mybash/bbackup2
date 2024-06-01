@@ -1,0 +1,134 @@
+#!/bin/bash
+
+USAGE=$(
+cat <<-END
+    Perform various useful operations on the folders/directories
+    -----------------------------------------------------------------------------------------------------------------------                                
+    bbackup    mypathXYZ/                           	#### copied into default path ~/zarchive/mypath_suffix_20230202/
+    bbackup    ~/mypathXYZ   ~/mypath_target/      	#### copied from mypathXYZ to mypath_target/
+    -----------------------------------------------------------------------------------------------------------------------                                
+END
+)
+
+#### Global Config. #################################
+# set -x  # Output commands being run.
+set -e # Exit on error.å
+
+#### Global vars ###################################
+FUNAME=$(basename "$0")
+YMD=$(date '+%Y%m%d')
+this_file_path=$(dirname "$0")
+
+
+### Input Params and Defaults ##################################
+[ $# -eq 0 ] && echo -e "$USAGE" && exit            ###  No input print doc
+task=$1 && [ -z $1 ] && task="smallsize"       ###  print bbackup size
+current_path=$2 && [ -z $2 ] && current_path="$PWD"           ###  current path as default
+src_folder="$PWD"
+dst_file=""
+backup_type="all" # default backup type
+params=""
+name_regex="*"
+
+# usage small/big file treshold
+# `b'    for 512-byte blocks (this is the default if no suffix  is used)
+# `c'    for bytes
+# `w'    for two-byte words
+# `k'    for Kilobytes       (units of 1024 bytes)
+# `M'    for Megabytes    (units of 1048576 bytes)
+# `G'    for Gigabytes (units of 1073741824 bytes)
+filesize_treshold="2M"
+
+
+### FUNCTIONS
+
+
+function is_known_option() {
+    local known_options=("all" "smallfiles" "bigfiles" "recentfile" "dotfiles" "recentfile" "folderonly")
+    for x in "${known_options[@]}"; do
+        if [[ "$x" == "$1" ]]; then
+        return 0
+        fi
+    done
+    return 1
+}
+
+### CORE
+
+for arg in $*
+do  
+    if [[ "$arg" == *.zip ]]; then
+        dst_file=$arg
+    elif   [[ -z "$arg" ]]; then 
+        src_folder=$(basename "$arg")
+    elif is_known_option "$arg"; then 
+        
+        # bbackup dotfiles target_file.zip
+        # bbackup smallfiles. myfolder/ target_file.zip
+        # bbackup bigfiles myfolder/ target_file.zip
+        # bbackup all myfolder/ target_file.zip
+        # bbackup all "myfolder/*.py" target_file.zip
+        # bbackup recentfile myfolder/ target_file.zip 10d ### past 10 days
+
+        if [[ "$arg" == "all" ]]; then
+            params=""
+        elif [[ "$arg" == "dotfiles" ]]; then
+            params="! -name '*.DS_Store' -path '*/.*'"
+        elif [[ "$arg" == "bigfiles" ]]; then
+            params="-path '*/.*'"
+        elif [[ "$arg" == "smallfiles" ]]; then # look at file size
+            params="-size -${filesize_treshold}"
+        elif [[ "$arg" == "bigfiles" ]]; then # look at file size
+            params="-size +${filesize_treshold}"
+        elif [[ "$arg" == "folderonly" ]]; then
+            params="-type d"
+        elif [[ "$arg" == "recentfile" ]]; then
+            params="mtime -n"
+        fi
+    else 
+        if [[ $src_folder != "" ]]; then
+            if [[ "$arg" == *"*"* ]]; then
+                src_folder=$(cut -d '*' -f1 <<< "$arg")
+                file=$(cut -d '*' -f1 <<< "$arg")
+                _regex=$(cut -d '*' -f2 <<< "$arg")
+                name_regex="*$_regex"
+            else
+                src_folder=$arg
+            fi
+            
+        fi
+    fi
+done
+
+
+src_folder=${src_folder%/} #remove trail slash
+tmp_folder=$(mktemp -d)
+
+if [[ ! -d "$src_folder" ]]; then
+    echo "You must to select source folder..."
+    echo $usage
+    exit 1
+fi
+
+
+echo "backup type: ${backup_type} source folder(pattern): ${src_folder} file pattern: ${name_regex} destination: ${dst_file}"
+backup_cmd="find '$src_folder' $params -name '$name_regex' -exec cp -a {} '$tmp_folder' \;"
+# echo $backup_cmd
+echo "Backup Files ..."
+eval $backup_cmd
+
+echo "Compressing..."
+prv_dir=$(PWD)
+cd $tmp_folder
+zip -r  $dst_file . 2>&1 1>/dev/null
+cp $dst_file "$prv_dir/"
+cd - 
+
+echo "Compressed to: ${dst_file}"
+
+echo "Cleaning Files..."
+rm -rf $tmp_folder
+
+
+
+### EXIT BACKUP
