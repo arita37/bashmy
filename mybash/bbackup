@@ -3,9 +3,13 @@ USAGE=$(
       cat <<-END
      Perform various useful operations on the folders/directories
                                 
-     bbackup    mypathXYZ/                           	#### copied into default path ~/zarchive/mypath_suffix_20230202/
-     bbackup    ~/mypathXYZ   ~/mypath_target/      	#### copied from mypathXYZ to mypath_target/
+     bbackup all   mypathXYZ/                           	
+     bbackup dotfile   ~/mypathXYZ   ~/mypath_target.zip      	
+     bbackup smallfile   ~/mypathXYZ   ~/mypath_target.zip  1mb      	
+     bbackup recentfile   ~/mypathXYZ   ~/mypath_target.zip  10d     ### most 10 past days modified 	 
+     bbackup folderonly   ~/mypathXYZ   ~/mypath_target.zip  
 
+     bbackup all   mypathXYZ/**/*.py                           	
 
 
 
