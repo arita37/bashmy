@@ -18,6 +18,8 @@
         export mybashdir="THE_REPO_FOLDER/mybash/"
         export PATH="$mybashdir:$PATH"
         chmod -R 777 $mybashdir                    ### exec
+
+        source "THE_REPO_FOLDER/mybash/__init/init_all.sh"
      ##################################################
 
      source ~/.zshrc
@@ -30,6 +32,14 @@
 
      folder backup   mypathXYZ/                           #### copied into default path ~/zarchive/mypath_suffix_20230202/
      folder backup   ~/mypathXYZ   ~/mypath_target/
+
+
+     bbackup all   mypath/zxyz/*.py      "path1/mytargetfile.zip"
+
+     bbackup smallfile   mypath/zxyz/*.py      "path1/mytargetfile.zip"  1mb
+
+     bbackup dotfile    $HOME/*      "path1/dotfile.zip"  1mb
+
 
 
   4) you can debug bash script online here
