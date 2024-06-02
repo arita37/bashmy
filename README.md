@@ -20,7 +20,7 @@
         chmod -R 777 $mybashdir                    ### exec
      ##################################################
 
-     ßsource ~/.zshrc
+     source ~/.zshrc
 
 #### Example Usage
      folder size        ./             #### Print folder size in Gb
