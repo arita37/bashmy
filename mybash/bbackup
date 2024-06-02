@@ -33,50 +33,27 @@ ppath=$2     && [ -z $2 ] && ppath="$PWD"    ###  current path as default
 
 
 
-###########################################################################
-######## Bash Backup Utils   #############################################
-    function backup_dot() {
-      ### Backup Dot Files
-      # backup_dot "~/zbackup/$(date_now '%Y%m%d')/dotfiles2.tar.gz"  10 
-      local dtnow="$(date_now '%Y%m%d')"  
-      local fileout=$1   && [ -z $1 ] &&  local fileout="~/zbackup/$dtnow/dotfiles.tar.gz" 
-      local maxdepth=$2  && [ -z $2 ] &&  local maxdepth=10
-
-      local dircurr="$(pwd)"
-      cd ~
-      echo $(pwd)
-
-       mkdir -p  $HOME/zbackup/$dtnow/      
-
-      find ./ -type f,d -name ".*" ! -name '*.DS_Store' -size -10M  -maxdepth $maxdepth -exec tar -czvf "$fileout" {} +
-
-      cd $dircurr
-    }
 
 
-
-
-
-    function backup_foldername() {
-      ## backup_foldername ~  "$HOME/zbackup/2023029b/"  3
-      local dtnow="$(date_now '%Y%m%d')"
-      local dirin=$1     && [ -z $1 ] &&  local dirin="./"
-      local dirout=$2    && [ -z $2 ] &&  local dirout="$HOME/zbackup/$dtnow/foldernames"
-      local maxdepth=$3  && [ -z $3 ] &&  local maxdepth=2
-
-      find $dirin -type d -maxdepth $maxdepth ! -name 'Library' | while read dir; do
-        mkdir -p "$dirout/${dir#$1}"
-      done
-
-      echo "foldername copied to ${dirout}"
-    }
+### Core ######################################################
+if [[ "$task" = all ]]; then
 
 
 
 
 
 
-    function backup_all_pastday() {
+
+
+
+
+
+
+exit 0
+elif [[ "$task" = recentfile ]]; then
+      ### recent file modified files + created
+
+
        ### backup past 90 days
        ## backup_all_pastday 10  -200   /Users/macair/gitdev/
        local dtnow="$(date_now '%Y%m%d')"
@@ -101,33 +78,6 @@ ppath=$2     && [ -z $2 ] && ppath="$PWD"    ###  current path as default
        cd $dircurr
        echo "backup_all done"
 
-    }
-
-
-
-
-
-
-### Core ######################################################
-if [[ "$task" = all ]]; then
-
-
-
-
-
-
-
-
-
-
-
-
-exit 0
-elif [[ "$task" = recentfile ]]; then
-      ### recent file modified files + created
-
-
-
 
 
 
@@ -146,11 +96,25 @@ elif [[ "$task" = smallfile ]]; then
 
 
 exit 0
-elif [[ "$task" = bigfile ]]; then
+elif [[ "$task" = dotfile ]]; then
 
 
 
+      ### Backup Dot Files
+      # backup_dot "~/zbackup/$(date_now '%Y%m%d')/dotfiles2.tar.gz"  10 
+      local dtnow="$(date_now '%Y%m%d')"  
+      local fileout=$1   && [ -z $1 ] &&  local fileout="~/zbackup/$dtnow/dotfiles.tar.gz" 
+      local maxdepth=$2  && [ -z $2 ] &&  local maxdepth=10
 
+      local dircurr="$(pwd)"
+      cd ~
+      echo $(pwd)
+
+       mkdir -p  $HOME/zbackup/$dtnow/      
+
+      find ./ -type f,d -name ".*" ! -name '*.DS_Store' -size -10M  -maxdepth $maxdepth -exec tar -czvf "$fileout" {} +
+
+      cd $dircurr
 
 
 exit 0
@@ -158,7 +122,17 @@ elif [[ "$task" = folderonly ]]; then
 
 
 
+      ## backup_foldername ~  "$HOME/zbackup/2023029b/"  3
+      local dtnow="$(date_now '%Y%m%d')"
+      local dirin=$1     && [ -z $1 ] &&  local dirin="./"
+      local dirout=$2    && [ -z $2 ] &&  local dirout="$HOME/zbackup/$dtnow/foldernames"
+      local maxdepth=$3  && [ -z $3 ] &&  local maxdepth=2
 
+      find $dirin -type d -maxdepth $maxdepth ! -name 'Library' | while read dir; do
+        mkdir -p "$dirout/${dir#$1}"
+      done
+
+      echo "foldername copied to ${dirout}"
 
 
 
