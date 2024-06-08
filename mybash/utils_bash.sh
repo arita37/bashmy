@@ -7,60 +7,6 @@ LINE_SEP3="###########################"
 LINE_END="\n\n\n#######################################################################"
 
 
-function exists_in_list() {
-    # https://www.baeldung.com/linux/check-variable-exists-in-list
-    # list1="banana pear apple strawberry lime"
-    # if exists_in_list "pear"   "$list1" ","; then
-    #     echo "pear is in the list"
-    # else
-    #     echo "pear is not in the list"
-    # fi    
-
-    VALUE=$1
-    LIST=$2
-    DELIMITER=$3  &&  [ -z $3 ] &&    DELIMITER=","
-
-    echo $LIST | tr "$DELIMITER" '\n' | grep -F -q -x "$VALUE"
-}
-
-alias exists=exists_in_list
-
-
-
-function extract_files() {
-  # $1 : archive file
-  # $2 : destination folder
-  local file="$1"
-  local dest="$2"
-  
-  if [ ! -f "$file" ]; then
-    echo "Error: $file not found"
-    return 1
-  fi
-
-  if [ ! -d "$dest" ]; then
-    echo "Error: $dest not found"
-    return 1
-  fi
-
-  case "$file" in
-    *.tar.bz2)  tar xjf "$file" -C "$dest";;
-    *.tar.gz)   tar xzf "$file" -C "$dest";;
-    *.bz2)      bunzip2 "$file" -C "$dest";;
-    *.rar)      unrar x "$file" "$dest";;
-    *.gz)       gunzip "$file";;
-    *.tar)      tar xf "$file" -C "$dest";;
-    *.tbz2)     tar xjf "$file" -C "$dest";;
-    *.tgz)      tar xzf "$file" -C "$dest";;
-    *.zip)      unzip "$fi no le" -d "$dest";;
-    *.Z)        uncompress "$file";;
-    *.7z)       7z x "$file" -o"$dest";;
-    *)          echo "Error: $file is not a supported archive format";;
-  esac
-}
-
-
-
 function echo2 () {   
   if [[  $2 == ''  ]]; then
     echo -e $1  2>&1 | tee -a "${LOGFILE}"
