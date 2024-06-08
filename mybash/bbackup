@@ -1,24 +1,30 @@
 #!/bin/bash
+
 USAGE=$(
-      cat <<-END
-     Perform various useful operations on the folders/directories
-                                
-     bbackup all   mypathXYZ/                           	
-     bbackup dotfile   ~/mypathXYZ   ~/mypath_target.zip      	
-     bbackup smallfile   ~/mypathXYZ   ~/mypath_target.zip  1mb      	
-     bbackup recentfile   ~/mypathXYZ   ~/mypath_target.zip  10d     ### most 10 past days modified 	 
-     bbackup folderonly   ~/mypathXYZ   ~/mypath_target.zip  
+    cat <<-END
+    Perform various useful operations on the folders/directories
 
-     bbackup all   mypathXYZ/**/*.py                           	
+    Usage:
+      bbackup all [PATTERN] [OUTPUT_FILE]
+        Example: bbackup all "*.txt" backup_all_files.tar.gz
 
+      bbackup recentfile [DIRECTORY] [OUTPUT_FILE] [PERIOD] [MAX_DEPTH]
+        Example: bbackup recentfile ~/Documents/ recent_backup.tar.gz -10 10
 
+      bbackup smallfile [DIRECTORY] [OUTPUT_FILE] [PERIOD] [MAX_DEPTH] [MAX_SIZE]
+        Example: bbackup smallfile ~/Documents/ small_backup.tar.gz -10 10 1M
 
+      bbackup dotfile [DIRECTORY] [OUTPUT_FILE] [MAX_DEPTH]
+        Example: bbackup dotfile ~/ dotfiles_backup.tar.gz 10
+
+      bbackup folderonly [DIRECTORY] [OUTPUT_DIRECTORY] [MAX_DEPTH]
+        Example: bbackup folderonly ~/ ~/zbackup/folder_structure 2
 END
 )
 
 #### Global Config. #################################
 # set -x  # Output commands being run.
-set -e # Exit on error.å
+set -e # Exit on error.
 
 #### Global vars ###################################
 FUNAME=$(basename "$0")
@@ -26,179 +32,106 @@ YMD=$(date '+%Y%m%d')
 this_file_path=$(dirname "$0")
 
 #### Import utils #################################
-source "$this_file_path/utils/util_stable.sh"
-
-
-### Input Params and Defaults ##################################
-[ $# -eq 0 ] && echo -e "$USAGE" && exit ###  No input print doc
-task=$1      && [ -z $1 ] && task="smallsize"     ###  print bbackup size
-ppath=$2     && [ -z $2 ] && ppath="$PWD"    ###  current path as default
-
-
-
-
-
-
-### Core ######################################################
-if [[ "$task" = all ]]; then
-
-       local dtnow="$(date_now '%Y%m%d')"
-       local maxdepth=$1  && [ -z $1 ]  &&  local maxdepth=100
-       local period=$2    && [ -z $2 ]  &&  local period="-10000"
-       local dirin=$3     && [ -z $3 ]  &&  local dirin="~/" 
-       local fileout=$4   && [ -z $4 ]  &&  local fileout="$HOME/zbackup/$dtnow/backup_all_200.tar.gz" 
-
-       local dircurr="$(pwd)"
-       cd $dirin
-       echo "$(pwd)"
-
-
-
-
-
-
-
-
-
-
-
-exit 0
-elif [[ "$task" = recentfile ]]; then
-      ### recent file modified files + created
-
-
-       ### backup past 90 days
-       ## backup_all_pastday 10  -200   /Users/macair/gitdev/
-       local dtnow="$(date_now '%Y%m%d')"
-       local maxdepth=$1  && [ -z $1 ]  &&  local maxdepth=100
-       local period=$2    && [ -z $2 ]  &&  local period="-10"
-       local dirin=$3     && [ -z $3 ]  &&  local dirin="~/" 
-       local fileout=$4   && [ -z $4 ]  &&  local fileout="$HOME/zbackup/$dtnow/backup_all_200.tar.gz" 
-
-       local dircurr="$(pwd)"
-       cd $dirin
-       echo "$(pwd)"
-
-       mkdir -p  $HOME/zbackup/$dtnow/
-
-
-
-       # find . \( -name "*.pptx" -o -name "*.sql" -o -name "*.py" -o -name "*.docx" -o -name "*.txt" -o -name "*.sh" -o -name "*.xls*" -o -name "*.csv" \)
-       find "./" -type f   -mtime $period  -size -10M -maxdepth $maxdepth  ! -name '*.DS_Store' ! -name '*/conda3/*'  ! -name '*.parquet'  ! -name '*.git/*'    \( -name "*.pptx" -o -name "*.sql" -o -name "*.py" -o -name "*.docx" -o -name "*.txt" -o -name "*.sh" -o -name "*.xl*" -o -name "*.csv" \)         -print0 | xargs -0 tar -czvf - | split -d  -b 2G - $fileout
-
-       echo $fileout
-
-       cd $dircurr
-       echo "backup_all done"
-
-
-
-
-
-
-
-
-exit 0
-elif [[ "$task" = smallfile ]]; then
-
-
-       ### backup past 90 days
-       ## backup_all_pastday 10  -200   /Users/macair/gitdev/
-       local dtnow="$(date_now '%Y%m%d')"
-       local maxdepth=$1  && [ -z $1 ]  &&  local maxdepth=100
-       local period=$2    && [ -z $2 ]  &&  local period="-10"
-       local dirin=$3     && [ -z $3 ]  &&  local dirin="~/" 
-       local fileout=$4   && [ -z $4 ]  &&  local fileout="$HOME/zbackup/$dtnow/backup_all_200.tar.gz" 
-       local maxsize=$2    && [ -z $2 ]  &&  local maxsize="1M"
-
-
-       local dircurr="$(pwd)"
-       cd $dirin
-       echo "$(pwd)"
-
-       mkdir -p  $HOME/zbackup/$dtnow/
-
-
-
-       # find . \( -name "*.pptx" -o -name "*.sql" -o -name "*.py" -o -name "*.docx" -o -name "*.txt" -o -name "*.sh" -o -name "*.xls*" -o -name "*.csv" \)
-       find "./" -type f   -mtime $period  -size -$maxsize -maxdepth $maxdepth  ! -name '*.DS_Store' ! -name '*/conda3/*'  ! -name '*.parquet'  ! -name '*.git/*'    \( -name "*.pptx" -o -name "*.sql" -o -name "*.py" -o -name "*.docx" -o -name "*.txt" -o -name "*.sh" -o -name "*.xl*" -o -name "*.csv" \)         -print0 | xargs -0 tar -czvf - | split -d  -b 2G - $fileout
-
-       echo $fileout
-
-       cd $dircurr
-       echo "backup_all done"
-
-
-
-
-
-
-
-exit 0
-elif [[ "$task" = dotfile ]]; then
-
-
-
-      ### Backup Dot Files
-      # backup_dot "~/zbackup/$(date_now '%Y%m%d')/dotfiles2.tar.gz"  10 
-      local dtnow="$(date_now '%Y%m%d')"  
-      local fileout=$1   && [ -z $1 ] &&  local fileout="~/zbackup/$dtnow/dotfiles.tar.gz" 
-      local maxdepth=$2  && [ -z $2 ] &&  local maxdepth=10
-
-      local dircurr="$(pwd)"
-      cd ~
-      echo $(pwd)
-
-       mkdir -p  $HOME/zbackup/$dtnow/      
-
-      find ./ -type f,d -name ".*" ! -name '*.DS_Store' -size -10M  -maxdepth $maxdepth -exec tar -czvf "$fileout" {} +
-
-      cd $dircurr
-
-
-exit 0
-elif [[ "$task" = folderonly ]]; then
-
-
-
-      ## backup_foldername ~  "$HOME/zbackup/2023029b/"  3
-      local dtnow="$(date_now '%Y%m%d')"
-      local dirin=$1     && [ -z $1 ] &&  local dirin="./"
-      local dirout=$2    && [ -z $2 ] &&  local dirout="$HOME/zbackup/$dtnow/foldernames"
-      local maxdepth=$3  && [ -z $3 ] &&  local maxdepth=2
-
-      find $dirin -type d -maxdepth $maxdepth ! -name 'Library' | while read dir; do
-        mkdir -p "$dirout/${dir#$1}"
-      done
-
-      echo "foldername copied to ${dirout}"
-
-
-
-
-
-
-
-exit 0
+if [ -f "$this_file_path/utils/util_stable.sh" ]; then
+    source "$this_file_path/utils/util_stable.sh"
 else
-      echo $USAGE
+    echo "Warning: utils/util_stable.sh not found, proceeding without it."
 fi
 
-### https://stackoverflow.com/questions/2005192/how-to-execute-a-bash-command-stored-as-a-string-with-quotes-and-asterisk
-# cmd=( mysql AMORE -u username -ppassword -h localhost -e "SELECT  host  FROM amoreconfig" )
-# printf 'Proposing to run: '
-# printf '%q ' "${cmd[@]}"
-# printf '\n'
+### Function Definitions ##################################
+date_now() {
+    date +"$1"
+}
+
+### Input Params and Defaults ##################################
+[ $# -eq 0 ] && echo -e "$USAGE" && exit 1 ### No input, print doc
+task=$1
+shift
+
+### Core ######################################################
+if [[ "$task" == "all" ]]; then
+    dtnow=$(date_now '%Y%m%d')
+    pattern=${1:-'./*'}
+    fileout=${2:-"$HOME/zbackup/$dtnow/backup_all_200.tar.gz"}
+    mkdir -p "$(dirname "$fileout")"
+
+    echo "Backing up files matching pattern: $pattern"
+    echo "Output file: $fileout"
+
+    # Using eval to expand the pattern into actual files
+    eval tar -czvf "$fileout" "$pattern"
+
+    echo "Backup completed: $fileout"
+    exit 0
+
+
+elif [[ "$task" == "recentfile" ]]; then
+    dtnow=$(date_now '%Y%m%d')
+    dirin=${1:-"$PWD"}
+    fileout=${2:-"$HOME/zbackup/$dtnow/backup_recent_200.tar.gz"}
+    period=${3:--1000}
+    maxdepth=${4:-100}
+    dircurr=$(pwd)
+    cd "$dirin"
+    echo "$(pwd)"
+    mkdir -p "$(dirname "$fileout")"
+    find . -maxdepth "$maxdepth" -mtime "$period" -type f ! -name '*.DS_Store' -print0 | tee /tmp/files_to_backup.txt | tar -czvf "$fileout" --null -T -
+    cd "$dircurr"
+    echo "Backup completed: $fileout"
+    exit 0
+
+
+
+elif [[ "$task" == "smallfile" ]]; then
+    dtnow=$(date_now '%Y%m%d')
+    dirin=${1:-"$PWD"}
+    fileout=${2:-"$HOME/zbackup/$dtnow/backup_small_200.tar.gz"}
+    period=${3:--1000}
+    maxdepth=${4:-100}
+    maxsize=${5:-"1M"}
+    dircurr=$(pwd)
+    cd "$dirin"
+    echo "$(pwd)"
+    mkdir -p "$(dirname "$fileout")"
+    find . -maxdepth "$maxdepth" -mtime "$period" -size -"$maxsize" -type f ! -name '*.DS_Store' -print0 | tee /tmp/files_to_backup.txt | tar -czvf "$fileout" --null -T -
+    cd "$dircurr"
+    echo "Backup completed: $fileout"
+    exit 0
+
+elif [[ "$task" == "dotfile" ]]; then
+    dtnow=$(date_now '%Y%m%d')
+    dirin=${1:-"$HOME"}
+    fileout=${2:-"$HOME/zbackup/$dtnow/dotfiles.tar.gz"}
+    maxdepth=${3:-10}
+    dircurr=$(pwd)
+    cd "$dirin"
+    echo "$(pwd)"
+    mkdir -p "$(dirname "$fileout")"
+    find . -maxdepth "$maxdepth" -name ".*" ! -name '*.DS_Store' -size -10M -type f,d -print0 | tee /tmp/files_to_backup.txt | tar -czvf "$fileout" --null -T -
+    cd "$dircurr"
+    echo "Dotfiles backup completed: $fileout"
+    exit 0
+
+
+
+
+elif [[ "$task" == "folderonly" ]]; then
+    dtnow=$(date_now '%Y%m%d')
+    dirin=${1:-"./"}
+    dirout=${2:-"$HOME/zbackup/$dtnow/foldernames"}
+    maxdepth=${3:-2}
+    mkdir -p "$dirout"
+    find "$dirin" -type d -maxdepth "$maxdepth" ! -name 'Library' | while read -r dir; do
+        mkdir -p "$dirout/${dir#$dirin}"
+    done
+    echo "Folder structure copied to $dirout"
+    exit 0
 
 
 
 
 
-
-
-
-
-
-
-
-
+else
+    echo "$USAGE"
+    exit 1
+fi
